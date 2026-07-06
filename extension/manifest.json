@@ -1,0 +1,52 @@
+{
+  "manifest_version": 3,
+  "name": "Chrome Prioritizer",
+  "description": "Blocks X/Twitter, Gmail, and Slack outside appointed communication windows.",
+  "version": "0.1.0",
+  "permissions": [
+    "alarms",
+    "storage",
+    "tabs",
+    "webNavigation"
+  ],
+  "host_permissions": [
+    "*://twitter.com/*",
+    "*://*.twitter.com/*",
+    "*://x.com/*",
+    "*://*.x.com/*",
+    "*://mail.google.com/*",
+    "*://*.slack.com/*",
+    "http://127.0.0.1:4128/*",
+    "http://localhost:4128/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://twitter.com/*",
+        "*://*.twitter.com/*",
+        "*://x.com/*",
+        "*://*.x.com/*",
+        "*://mail.google.com/*",
+        "*://*.slack.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_start"
+    }
+  ],
+  "chrome_url_overrides": {
+    "newtab": "pages/newtab.html"
+  },
+  "chrome_settings_overrides": {
+    "homepage": "http://127.0.0.1:4128/pages/dashboard.html"
+  },
+  "options_page": "pages/options.html",
+  "action": {
+    "default_title": "Chrome Prioritizer"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "chrome-prioritizer",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "check": "node --check companion/server.js && node --check extension/background.js && node --check extension/content.js && node --check extension/lib/schedule.js && node --check extension/pages/dashboard.js && node --check extension/pages/newtab.js && node --check extension/pages/options.js",
+    "test": "node test/schedule.test.mjs",
+    "companion": "node companion/server.js",
+    "serve:extension": "python3 -m http.server 4173 --directory extension"
+  },
+  "description": "Local Chrome extension that replaces the new tab with a priority dashboard and blocks distracting sites outside scheduled communication windows.",
+  "author": "Sam Gaddis",
+  "license": "MIT",
+  "homepage": "https://github.com/Runpoint-Partners/chrome-prioritizer"
+}

@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Priority Dashboard</title>
+    <link rel="icon" id="favicon" type="image/svg+xml" href="./favicon.svg">
+    <link rel="stylesheet" href="./dashboard.css">
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <div class="date-stack">
+          <span class="time" id="timeText">--:--</span>
+          <span class="date" id="dateText">Loading</span>
+        </div>
+        <div class="focus-control" id="focusControl">
+          <button class="top-focus" id="startTopButton" type="button">
+            <span>Most important today</span>
+            <strong id="topTitle">Loading tasks</strong>
+          </button>
+          <button class="primary-button" id="startFocusButton" type="button">Start focus</button>
+        </div>
+        <div class="active-focus" id="activeFocus" hidden>
+          <span class="pulse-dot"></span>
+          <span class="timer" id="elapsedText">00:00</span>
+          <span class="active-title" id="activeTitle"></span>
+          <button class="stop-button" id="stopFocusButton" type="button" aria-label="Stop focus"></button>
+        </div>
+      </header>
+
+      <section class="status-strip" id="statusStrip">
+        <div class="status-left">
+          <span class="lock-icon" id="lockIcon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect class="lock-body" x="4.5" y="10.25" width="15" height="11" rx="3"/>
+              <path class="lock-shackle lock-shackle--closed" d="M7.75 10.25V7.5a4.25 4.25 0 0 1 8.5 0v2.75"/>
+              <path class="lock-shackle lock-shackle--open" d="M7.75 10.25V7.5a4.25 4.25 0 0 1 7.1 -3.3"/>
+            </svg>
+          </span>
+          <strong>Slack, Gmail, X</strong>
+          <span id="commsState">blocked</span>
+        </div>
+        <span class="mono" id="commsWhen">Opens soon</span>
+      </section>
+
+      <section class="dashboard-grid">
+        <section class="lane">
+          <div class="lane-heading">
+            <h2>Tasks</h2>
+            <a id="linearLink" href="https://linear.app" target="_blank" rel="noreferrer">Linear</a>
+          </div>
+          <div class="row-list" id="linearList"></div>
+        </section>
+
+        <section class="plan-panel">
+          <div class="lane-heading">
+            <h2 id="planTitle">Today's plan</h2>
+            <div class="plan-meta">
+              <div class="plan-date-controls" aria-label="Planning date">
+                <button class="date-step" id="prevDayButton" type="button" aria-label="Previous day">‹</button>
+                <span class="plan-date-label" id="planDateLabel">Today</span>
+                <button class="date-step" id="nextDayButton" type="button" aria-label="Next day">›</button>
+              </div>
+              <span id="focusLabel">0 slots filled</span>
+            </div>
+          </div>
+          <div class="agenda-list" id="agendaList"></div>
+        </section>
+
+        <section class="lane">
+          <div class="lane-heading">
+            <h2>Suggested</h2>
+            <span id="suggestCount">0</span>
+          </div>
+          <div class="row-list" id="suggestionsList"></div>
+        </section>
+      </section>
+    </main>
+
+    <div class="modal-backdrop" id="ticketModal" hidden>
+      <form class="ticket-modal" id="ticketForm">
+        <div class="modal-heading">
+          <h2>Create Linear ticket</h2>
+          <button class="icon-button" id="ticketCloseButton" type="button" aria-label="Close">×</button>
+        </div>
+        <label>
+          <span>Title</span>
+          <input id="ticketTitle" name="title" autocomplete="off">
+        </label>
+        <div class="modal-grid">
+          <label>
+            <span>Priority</span>
+            <select id="ticketPriority" name="priority">
+              <option value="1">Urgent</option>
+              <option value="2">High</option>
+              <option value="3">Medium</option>
+              <option value="4">Low</option>
+              <option value="0">No priority</option>
+            </select>
+          </label>
+          <label>
+            <span>Team</span>
+            <select id="ticketTeam" name="team"></select>
+          </label>
+        </div>
+        <p class="modal-status" id="ticketStatus"></p>
+        <div class="modal-actions">
+          <button class="secondary-button" id="ticketCancelButton" type="button">Cancel</button>
+          <button class="primary-button" id="ticketSubmitButton" type="submit">Create</button>
+        </div>
+      </form>
+    </div>
+    <script type="module" src="./dashboard.js"></script>
+  </body>
+</html>

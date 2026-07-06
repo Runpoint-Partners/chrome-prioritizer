@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Chrome Prioritizer Options</title>
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+    <link rel="stylesheet" href="./dashboard.css">
+    <style>
+      .options-shell {
+        max-width: 760px;
+        min-height: 100vh;
+        margin: 0 auto;
+        padding: 36px 22px;
+      }
+
+      .options-header {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 20px;
+        margin-bottom: 24px;
+      }
+
+      .options-header h1 {
+        margin: 0;
+        font-size: 28px;
+        line-height: 1;
+      }
+
+      .settings-panel {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+
+      .setting-row {
+        display: grid;
+        grid-template-columns: 160px minmax(0, 1fr);
+        gap: 16px;
+        align-items: center;
+      }
+
+      .setting-row label {
+        color: var(--charcoal);
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .window-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 110px 110px auto;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .input,
+      .time-input {
+        width: 100%;
+        height: 36px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 0 10px;
+        background: #ffffff;
+        color: var(--ink);
+      }
+
+      .checkbox {
+        width: 18px;
+        height: 18px;
+      }
+
+      .small-button {
+        height: 32px;
+        border-radius: 999px;
+        padding: 0 12px;
+        border: 1px solid var(--line);
+        background: #ffffff;
+        cursor: pointer;
+      }
+
+      .actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+      }
+
+      @media (max-width: 620px) {
+        .setting-row,
+        .window-row {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="options-shell">
+      <header class="options-header">
+        <h1>Prioritizer</h1>
+        <a href="./dashboard.html">Dashboard</a>
+      </header>
+
+      <section class="settings-panel">
+        <div class="setting-row">
+          <label for="blockEnabled">Block sites</label>
+          <input class="checkbox" id="blockEnabled" type="checkbox">
+        </div>
+
+        <div class="setting-row">
+          <label for="companionUrl">Companion URL</label>
+          <input class="input" id="companionUrl" type="url" spellcheck="false">
+        </div>
+
+        <div>
+          <div class="lane-heading">
+            <h2>Communication windows</h2>
+            <button class="small-button" id="addWindowButton" type="button">Add</button>
+          </div>
+          <div id="windowsList"></div>
+        </div>
+
+        <div class="actions">
+          <button class="small-button" id="resetButton" type="button">Reset</button>
+          <button class="primary-button" id="saveButton" type="button">Save</button>
+        </div>
+
+        <p class="row-meta" id="saveStatus"></p>
+      </section>
+    </main>
+    <script type="module" src="./options.js"></script>
+  </body>
+</html>
