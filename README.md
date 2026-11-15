@@ -55,7 +55,7 @@ The companion reads all of these from the environment (all optional):
 | Variable | Default | Purpose |
 |---|---|---|
 | `PORT` | `4128` | Port the companion listens on |
-| `HOST` | `127.0.0.1` | Host the companion binds to |
+| `HOST` | `127.0.0.1` | Loopback bind address: `127.0.0.1` or `::1` only |
 | `PRIORITIZER_TIME_ZONE` | machine's local time zone | IANA zone name used to bucket calendar events and email scan windows |
 | `PRIORITIZER_LLM_MODEL` | `gpt-5.5` | Model passed to the OpenAI Responses API |
 | `PRIORITIZER_GMAIL_MAX` | `32` | Max Gmail messages scanned per day |
@@ -64,7 +64,27 @@ The companion reads all of these from the environment (all optional):
 | `PRIORITIZER_LINEAR_PROJECT_TEAM_KEY` | unset (all teams) | Restrict the Projects panel to one Linear team key |
 | `PRIORITIZER_OWNER_NAME` | `the user` | Personalizes the wording sent to the LLM when scoring Gmail suggestions |
 
-The dashboard fetches `http://127.0.0.1:4128/api/dashboard`. If the companion is not running, it shows source-specific offline states.
+The dashboard fetches `/api/dashboard` from its own companion origin. If the companion is not running, it shows source-specific offline states.
+
+### Companion access
+
+Open the dashboard through the companion. The extension's new-tab, homepage and blocked-site redirects use this route. Direct visits to the packaged extension dashboard also redirect there; no extension origin receives API access. A separate static preview server cannot access the companion API.
+
+The hosted dashboard obtains a random session token through a same-origin JSON POST. Tokens remain in page memory, expire after eight hours and are invalidated when the companion restarts. The server keeps at most 128 sessions. Dashboard reads and Linear writes require the token, the dashboard request header and same-origin Fetch Metadata; POST also requires an exact matching Origin and JSON content type. Missing Origin is accepted only for authenticated same-origin GET fetches. Ordinary CLI API callers are unsupported. These checks protect the browser boundary; they do not isolate a compromised local process or an extension able to impersonate the hosted page.
+
+Host checks accept the configured loopback literal and `localhost` at the configured port. Other origins, including other loopback ports, opaque origins and all extension origins, are rejected. Keep the extension's Companion URL pointed at the running companion when changing its port or bind address. API credentials always stay on the page's own origin. After a restart, refresh again if the dashboard reports an expired session; writes are never replayed automatically.
+
+Each write gets a unique request ID. Repeated delivery of that ID within the same session and route shares one operation and its retained result. Retention is limited to 256 writes and 1 MiB per session, with a 64 KiB limit on each result. A failed response can follow a successful update, so refresh and check the issue before repeating an uncertain write. A new user action gets a new ID; this protection does not persist across companion restarts.
+
+The focused regression suite uses synthetic request handlers and fetch responses. It does not import the executable server or use account CLIs:
+
+```bash
+node --test test/companion-security.test.mjs
+```
+
+`npm test` runs the schedule and companion security suites. `npm run check` checks the companion, extension and browser-fixture JavaScript syntax.
+
+### Gmail suggestions
 
 Gmail suggestions use the OpenAI Responses API with `gpt-5.5` by default.
 The companion scans bounded excerpts from the prior business email window:

@@ -5,6 +5,7 @@ import { homedir } from "node:os";
 import { extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
+import { createCompanionHandler } from "./http-boundary.js";
 
 const execFileAsync = promisify(execFile);
 const PROJECT_ROOT = fileURLToPath(new URL("..", import.meta.url));
@@ -163,55 +164,23 @@ const LINEAR_MARK_DONE_MUTATION = `mutation MarkIssueDone($id: String!, $input: 
 }`;
 
 http
-  .createServer(async (request, response) => {
-    setCors(response);
-    const requestUrl = new URL(request.url, `http://${request.headers.host || `${HOST}:${PORT}`}`);
-
-    if (request.method === "OPTIONS") {
-      response.writeHead(204);
-      response.end();
-      return;
-    }
-
-    if (request.method === "GET" && requestUrl.pathname === "/health") {
-      sendJson(response, 200, { ok: true });
-      return;
-    }
-
-    if (request.method === "GET" && requestUrl.pathname === "/api/dashboard") {
-      const dateKey = parseDashboardDateKey(requestUrl.searchParams.get("date"))
-        || localDateKey(new Date());
-      const payload = await buildDashboardPayload(dateKey);
-      sendJson(response, 200, payload);
-      return;
-    }
-
-    if (request.method === "POST" && requestUrl.pathname === "/api/linear/issues") {
-      const result = await createLinearIssueFromRequest(request);
-      sendJson(response, result.ok ? 201 : 400, result);
-      return;
-    }
-
-    if (request.method === "POST" && requestUrl.pathname === "/api/linear/issues/priority") {
-      const result = await updateLinearIssuePriorityFromRequest(request);
-      sendJson(response, result.ok ? 200 : 400, result);
-      return;
-    }
-
-    if (request.method === "POST" && requestUrl.pathname === "/api/linear/issues/done") {
-      const result = await markLinearIssueDoneFromRequest(request);
-      sendJson(response, result.ok ? 200 : 400, result);
-      return;
-    }
-
-    if (request.method === "GET" && await serveStaticAsset(request, response)) {
-      return;
-    }
-
-    sendJson(response, 404, { error: "Not found" });
-  })
+  .createServer(createCompanionHandler({
+    host: HOST,
+    port: PORT,
+    handlers: {
+      dashboard: (requestUrl) => {
+        const dateKey = parseDashboardDateKey(requestUrl.searchParams.get("date"))
+          || localDateKey(new Date());
+        return buildDashboardPayload(dateKey);
+      },
+      createIssue: createLinearIssueFromRequest,
+      updatePriority: updateLinearIssuePriorityFromRequest,
+      markDone: markLinearIssueDoneFromRequest,
+      serveStatic: serveStaticAsset,
+    },
+  }))
   .listen(PORT, HOST, () => {
-    console.log(`Chrome Prioritizer companion listening on http://${HOST}:${PORT}`);
+    console.log(`Chrome Prioritizer companion listening on http://${HOST === "::1" ? "[::1]" : HOST}:${PORT}`);
     warmGmailSuggestions(tomorrowDateKey());
   });
 
@@ -1167,19 +1136,13 @@ function sanitizeError(error) {
   return error.message || "command failed";
 }
 
-function setCors(response) {
-  response.setHeader("Access-Control-Allow-Origin", "*");
-  response.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  response.setHeader("Access-Control-Allow-Headers", "Content-Type");
-}
-
 function sendJson(response, status, body) {
   response.writeHead(status, { "Content-Type": "application/json; charset=utf-8" });
   response.end(JSON.stringify(body, null, 2));
 }
 
 async function serveStaticAsset(request, response) {
-  const url = new URL(request.url, `http://${HOST}:${PORT}`);
+  const url = new URL(request.url, `http://${request.headers.host}`);
   const pathname = url.pathname === "/" || url.pathname === "/dashboard"
     ? "/pages/dashboard.html"
     : url.pathname;
@@ -1192,6 +1155,7 @@ async function serveStaticAsset(request, response) {
     "/pages/options.js",
     "/pages/favicon.svg",
     "/lib/schedule.js",
+    "/lib/companion-client.js",
   ];
 
   if (!allowed.includes(pathname)) return false;
