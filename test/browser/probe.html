@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Synthetic companion probe</title></head>
+<body>
+  <h1>Synthetic companion probe</h1>
+  <p>Manual checks with the actual companion client. Data and operations are local fixture state only.</p>
+  <p><a href="/pages/dashboard.html" target="_blank" rel="noopener noreferrer">Open actual dashboard</a>
+    <a id="untrusted" target="_blank" rel="noopener noreferrer">Open unrelated-origin tests</a></p>
+  <p>Use the dashboard for both create forms, priority and done. These buttons exercise transport and recovery without changing dashboard code.</p>
+  <button id="read">Bootstrap/read once</button>
+  <button id="write">Create one synthetic issue</button>
+  <button id="disconnect">Create once, then drop response</button>
+  <button id="sameRedirect">Request same-origin redirect</button>
+  <button id="otherRedirect">Request unrelated-origin redirect</button>
+  <button id="inspect">Refresh fixture log</button>
+  <pre id="result" aria-live="polite">No operation requested.</pre>
+  <h2>Fixture state and request log</h2>
+  <p>Tokens, cookies and request bodies are omitted. Refreshing this log does not call an account or dashboard handler.</p>
+  <pre id="state"></pre>
+  <script type="module" src="/fixture/probe.js"></script>
+</body>
+</html>

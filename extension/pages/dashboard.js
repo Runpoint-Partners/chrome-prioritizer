@@ -5,6 +5,7 @@ import {
   mergeSettings,
   parseTimeToMinutes,
 } from "../lib/schedule.js";
+import { createCompanionClient } from "../lib/companion-client.js";
 
 const PLAN_SLOT_MINUTES = 45;
 const PLAN_SLOT_COUNT = 4;
@@ -34,6 +35,7 @@ const FAVICON_MODES = {
 };
 let activeFaviconMode = null;
 let pendingGmailRefreshTimer = null;
+let companionFetch;
 const todayKey = localDateKey(new Date());
 const initialParams = new URLSearchParams(location.search);
 
@@ -107,6 +109,15 @@ void init();
 
 async function init() {
   state.settings = await readSettings();
+  // The extension's new-tab/background flows already open the hosted UI.
+  // Keep direct visits to the packaged dashboard on the same secure path.
+  if (location.protocol === "chrome-extension:") {
+    const url = new URL("/pages/dashboard.html", state.settings.companionUrl);
+    url.search = location.search;
+    location.replace(url.href);
+    return;
+  }
+  companionFetch = createCompanionClient({ origin: location.origin });
   const [active, plan, dismissedSuggestions] = await Promise.all([
     readActiveFocus(),
     readDailyPlan(state.planDate),
@@ -188,12 +199,11 @@ function bindActions() {
 }
 
 async function refreshData() {
-  const companionUrl = state.settings.companionUrl || DEFAULT_SETTINGS.companionUrl;
   const dateKey = state.planDate;
   try {
-    const url = new URL(`${companionUrl.replace(/\/$/, "")}/api/dashboard`);
+    const url = new URL("/api/dashboard", location.origin);
     url.searchParams.set("date", dateKey);
-    const response = await fetch(url.toString(), {
+    const response = await companionFetch(url.toString(), {
       cache: "no-store",
     });
     if (!response.ok) throw new Error(`Companion returned ${response.status}`);
@@ -1246,8 +1256,7 @@ async function createTicketFromModal(event) {
   elements.ticketStatus.textContent = "Creating in Linear...";
 
   try {
-    const companionUrl = state.settings.companionUrl || DEFAULT_SETTINGS.companionUrl;
-    const response = await fetch(`${companionUrl.replace(/\/$/, "")}/api/linear/issues`, {
+    const response = await companionFetch("/api/linear/issues", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -1287,8 +1296,7 @@ async function createProjectTask(project, rawTitle) {
   renderLinear();
 
   try {
-    const companionUrl = state.settings.companionUrl || DEFAULT_SETTINGS.companionUrl;
-    const response = await fetch(`${companionUrl.replace(/\/$/, "")}/api/linear/issues`, {
+    const response = await companionFetch("/api/linear/issues", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -1335,8 +1343,7 @@ async function updateLinearPriority(item, priority) {
   renderAgenda();
 
   try {
-    const companionUrl = state.settings.companionUrl || DEFAULT_SETTINGS.companionUrl;
-    const response = await fetch(`${companionUrl.replace(/\/$/, "")}/api/linear/issues/priority`, {
+    const response = await companionFetch("/api/linear/issues/priority", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -1377,8 +1384,7 @@ async function markItemDone(item, options = {}) {
   renderAgenda();
 
   try {
-    const companionUrl = state.settings.companionUrl || DEFAULT_SETTINGS.companionUrl;
-    const response = await fetch(`${companionUrl.replace(/\/$/, "")}/api/linear/issues/done`, {
+    const response = await companionFetch("/api/linear/issues/done", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ issueId: item.linearId }),

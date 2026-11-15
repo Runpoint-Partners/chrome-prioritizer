@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Unrelated-origin companion probes</title></head>
+<body>
+  <h1>Unrelated-origin companion probes</h1>
+  <p>This page is served from a second loopback port. Its requests target only the synthetic fixture.</p>
+  <p>Use Network and the trusted fixture log to distinguish browser refusal from a request rejected by the boundary. All operation counts should remain unchanged.</p>
+  <button id="read">Cross-origin dashboard GET</button>
+  <button id="bootstrap">Cross-origin session preflight</button>
+  <button id="preflight">Cross-origin write preflights</button>
+  <button id="simple">Simple cross-origin writes</button>
+  <button id="forms">Cross-origin form writes</button>
+  <button id="frame">Frame dashboard</button>
+  <pre id="result" aria-live="polite">No attempt requested.</pre>
+  <div id="frames"></div>
+  <script type="module" src="/untrusted.js"></script>
+</body>
+</html>

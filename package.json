@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "check": "node --check companion/server.js && node --check extension/background.js && node --check extension/content.js && node --check extension/lib/schedule.js && node --check extension/pages/dashboard.js && node --check extension/pages/newtab.js && node --check extension/pages/options.js",
-    "test": "node test/schedule.test.mjs",
+    "check": "node --check companion/server.js && node --check companion/http-boundary.js && node --check extension/background.js && node --check extension/content.js && node --check extension/lib/schedule.js && node --check extension/lib/companion-client.js && node --check extension/pages/dashboard.js && node --check extension/pages/newtab.js && node --check extension/pages/options.js && node --check test/browser-fixture.mjs && node --check test/browser/data.js && node --check test/browser/probe.js && node --check test/browser/untrusted.js",
+    "test": "node test/schedule.test.mjs && node --test test/companion-security.test.mjs",
     "companion": "node companion/server.js",
     "serve:extension": "python3 -m http.server 4173 --directory extension"
   },
